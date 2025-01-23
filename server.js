@@ -27,10 +27,6 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get("/check", (req, res) => {
-  res.json({ plate: plateNumber });
-});
-
 app.get("/show/:number/:status", (req, res) => {
   const plateNumber = req.params.number;
   const status = req.params.status; // 0: xanh, 1: đỏ
