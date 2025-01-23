@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Biển Số</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    <style>
+      .license-plate {
+        width: 460px;
+        height: 110px;
+        background: white;
+        border: 3px solid black;
+        border-radius: 8px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        margin: 50px auto;
+      }
+
+      .number-series {
+        font-size: 65px;
+        font-weight: bold;
+        letter-spacing: 8px;
+      }
+
+      .show {
+        display: flex;
+      }
+
+      .green {
+        color: green;
+      }
+
+      .red {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="license-plate" id="plateDisplay">
+      <div class="number-series" id="plateNumber"></div>
+    </div>
+
+    <script>
+      const socket = io("http://localhost:3000");
+      const plateDisplay = document.getElementById("plateDisplay");
+      const plateNumber = document.getElementById("plateNumber");
+
+      socket.on("showPlate", (data) => {
+        plateNumber.textContent = data.number;
+        plateNumber.className =
+          "number-series " + (data.status === "0" ? "green" : "red");
+        plateDisplay.classList.add("show");
+      });
+
+      socket.on("hidePlate", () => {
+        plateDisplay.classList.remove("show");
+      });
+    </script>
+  </body>
+</html>
