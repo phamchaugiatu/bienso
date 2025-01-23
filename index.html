@@ -10,29 +10,63 @@
         background-color: #00ff00;
         height: 100vh;
         display: flex;
-        justify-content: center;
+        justify-content: flex-end;
         align-items: center;
+        overflow: hidden;
+      }
+
+      .main-container {
+        display: flex;
+        gap: 20px;
+        padding-right: 30px;
+      }
+
+      .history-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
 
       .license-plate {
-        width: 800px;
-        height: 200px;
+        width: 600px;
+        height: 150px;
         background: white;
-        border: 5px solid black;
-        border-radius: 15px;
-        display: none;
+        border: 4px solid black;
+        border-radius: 12px;
+        display: flex;
         align-items: center;
         justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
       }
 
       .number-series {
-        font-size: 120px;
+        font-size: 90px;
         font-weight: bold;
-        letter-spacing: 15px;
+        letter-spacing: 12px;
+      }
+
+      .history-plate {
+        width: 400px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 3px solid black;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateX(0);
+        transition: all 0.5s ease;
+      }
+
+      .history-number {
+        font-size: 60px;
+        font-weight: bold;
+        letter-spacing: 8px;
       }
 
       .show {
-        display: flex;
+        opacity: 1;
       }
 
       .green {
@@ -42,23 +76,62 @@
       .red {
         color: red;
       }
+
+      .slide-left {
+        animation: slideLeft 0.5s ease forwards;
+      }
+
+      @keyframes slideLeft {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-420px);
+        }
+      }
     </style>
   </head>
   <body>
-    <div class="license-plate" id="plateDisplay">
-      <div class="number-series" id="plateNumber"></div>
+    <div class="main-container">
+      <div class="history-container" id="historyContainer"></div>
+      <div class="license-plate" id="plateDisplay">
+        <div class="number-series" id="plateNumber"></div>
+      </div>
     </div>
 
     <script>
       const socket = io("http://localhost:3000");
       const plateDisplay = document.getElementById("plateDisplay");
       const plateNumber = document.getElementById("plateNumber");
+      const historyContainer = document.getElementById("historyContainer");
+      const maxHistory = 5;
 
       socket.on("showPlate", (data) => {
         plateNumber.textContent = data.number;
         plateNumber.className =
           "number-series " + (data.status === "0" ? "green" : "red");
         plateDisplay.classList.add("show");
+
+        const historyPlate = document.createElement("div");
+        historyPlate.className = "history-plate";
+        historyPlate.innerHTML = `
+          <div class="history-number ${data.status === "0" ? "green" : "red"}">
+            ${data.number}
+          </div>
+        `;
+
+        historyContainer.insertBefore(
+          historyPlate,
+          historyContainer.firstChild
+        );
+
+        Array.from(historyContainer.children).forEach((plate, index) => {
+          if (index >= maxHistory) {
+            plate.remove();
+          } else {
+            plate.classList.add("slide-left");
+          }
+        });
       });
 
       socket.on("hidePlate", () => {
